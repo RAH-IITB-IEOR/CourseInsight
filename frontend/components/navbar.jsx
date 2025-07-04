@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { Bell, User, Menu, X, ChevronDown, Search } from "lucide-react";
+import Link from "next/link";
 
 const Navbar = () => {
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -57,14 +58,19 @@ const Navbar = () => {
 				<div className="flex items-center space-x-4">
 					{/* Notifications */}
 					<div className="relative">
-						<button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors duration-200 relative">
-							<Bell className="w-5 h-5" />
-							{notificationCount > 0 && (
-								<span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
-									{notificationCount}
-								</span>
-							)}
-						</button>
+						<Link href="/notifications">
+							<button
+								className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors duration-200 relative"
+								onClick={() => setNotificationCount(0)}
+							>
+								<Bell className="w-5 h-5" />
+								{notificationCount > 0 && (
+									<span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
+										{notificationCount}
+									</span>
+								)}
+							</button>
+						</Link>
 					</div>
 
 					{/* Profile Dropdown */}

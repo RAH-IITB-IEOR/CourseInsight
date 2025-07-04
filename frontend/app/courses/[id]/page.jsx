@@ -12,6 +12,7 @@ import {
 	ChevronDown,
 	ChevronUp,
 } from "lucide-react";
+import CommentThread from "@/components/commentThread";
 
 const CourseDetailsPage = () => {
 	const [comments, setComments] = useState([
@@ -34,6 +35,7 @@ const CourseDetailsPage = () => {
 					likes: 3,
 					liked: false,
 					timestamp: "1 day ago",
+					replies: [],
 				},
 			],
 		},
@@ -91,35 +93,32 @@ const CourseDetailsPage = () => {
 		],
 	};
 
-	const handleLike = (commentId, isReply = false, parentId = null) => {
+	const findAndUpdateComment = (comments, commentId, updateFn) => {
+		return comments.map((comment) => {
+			if (comment.id === commentId) {
+				return updateFn(comment);
+			}
+			if (comment.replies && comment.replies.length > 0) {
+				return {
+					...comment,
+					replies: findAndUpdateComment(
+						comment.replies,
+						commentId,
+						updateFn
+					),
+				};
+			}
+			return comment;
+		});
+	};
+
+	const handleLike = (commentId) => {
 		setComments((prev) =>
-			prev.map((comment) => {
-				if (isReply && comment.id === parentId) {
-					return {
-						...comment,
-						replies: comment.replies.map((reply) =>
-							reply.id === commentId
-								? {
-										...reply,
-										liked: !reply.liked,
-										likes: reply.liked
-											? reply.likes - 1
-											: reply.likes + 1,
-								  }
-								: reply
-						),
-					};
-				} else if (comment.id === commentId) {
-					return {
-						...comment,
-						liked: !comment.liked,
-						likes: comment.liked
-							? comment.likes - 1
-							: comment.likes + 1,
-					};
-				}
-				return comment;
-			})
+			findAndUpdateComment(prev, commentId, (comment) => ({
+				...comment,
+				liked: !comment.liked,
+				likes: comment.liked ? comment.likes - 1 : comment.likes + 1,
+			}))
 		);
 	};
 
@@ -140,7 +139,7 @@ const CourseDetailsPage = () => {
 		}
 	};
 
-	const handleAddReply = (commentId) => {
+	const handleAddReply = (parentCommentId) => {
 		if (replyContent.trim()) {
 			const newReply = {
 				id: Date.now(),
@@ -150,17 +149,16 @@ const CourseDetailsPage = () => {
 				likes: 0,
 				liked: false,
 				timestamp: "Just now",
+				replies: [],
 			};
+
 			setComments((prev) =>
-				prev.map((comment) =>
-					comment.id === commentId
-						? {
-								...comment,
-								replies: [...comment.replies, newReply],
-						  }
-						: comment
-				)
+				findAndUpdateComment(prev, parentCommentId, (comment) => ({
+					...comment,
+					replies: [...comment.replies, newReply],
+				}))
 			);
+
 			setReplyContent("");
 			setReplyingTo(null);
 		}
@@ -296,7 +294,6 @@ const CourseDetailsPage = () => {
 								<MessageCircle className="w-6 h-6 text-purple-600" />
 								Course Discussion
 							</h2>
-
 							{/* Review Section */}
 							{!hasReviewed && (
 								<div className="mb-8 p-6 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl border-l-4 border-purple-400">
@@ -373,7 +370,6 @@ const CourseDetailsPage = () => {
 									)}
 								</div>
 							)}
-
 							{/* Add Comment */}
 							<div className="mb-8">
 								<div className="flex gap-4">
@@ -400,7 +396,6 @@ const CourseDetailsPage = () => {
 									</div>
 								</div>
 							</div>
-
 							{/* Comments List */}
 							<div className="space-y-6">
 								{comments.map((comment) => (
@@ -408,164 +403,21 @@ const CourseDetailsPage = () => {
 										key={comment.id}
 										className="border-b border-gray-200 pb-6 last:border-b-0"
 									>
-										<div className="flex gap-4">
-											<div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full flex items-center justify-center text-white font-semibold">
-												{comment.avatar}
-											</div>
-											<div className="flex-1">
-												<div className="flex items-center gap-2 mb-2">
-													<span className="font-semibold text-gray-800">
-														{comment.author}
-													</span>
-													<span className="text-sm text-gray-500">
-														{comment.timestamp}
-													</span>
-												</div>
-												<p className="text-gray-700 mb-3">
-													{comment.content}
-												</p>
-												<div className="flex items-center gap-4">
-													<button
-														onClick={() =>
-															handleLike(
-																comment.id
-															)
-														}
-														className={`flex items-center gap-1 px-3 py-1 rounded-full transition-all ${
-															comment.liked
-																? "bg-purple-100 text-purple-700"
-																: "text-gray-500 hover:bg-gray-100"
-														}`}
-													>
-														<ThumbsUp className="w-4 h-4" />
-														{comment.likes}
-													</button>
-													<button
-														onClick={() =>
-															setReplyingTo(
-																comment.id
-															)
-														}
-														className="flex items-center gap-1 px-3 py-1 rounded-full text-gray-500 hover:bg-gray-100 transition-all"
-													>
-														<MessageCircle className="w-4 h-4" />
-														Reply
-													</button>
-												</div>
-
-												{/* Replies */}
-												{comment.replies.length > 0 && (
-													<div className="mt-4 ml-6 space-y-4">
-														{comment.replies.map(
-															(reply) => (
-																<div
-																	key={
-																		reply.id
-																	}
-																	className="flex gap-3"
-																>
-																	<div className="w-8 h-8 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-																		{
-																			reply.avatar
-																		}
-																	</div>
-																	<div className="flex-1">
-																		<div className="flex items-center gap-2 mb-1">
-																			<span className="font-semibold text-gray-800 text-sm">
-																				{
-																					reply.author
-																				}
-																			</span>
-																			<span className="text-xs text-gray-500">
-																				{
-																					reply.timestamp
-																				}
-																			</span>
-																		</div>
-																		<p className="text-gray-700 text-sm mb-2">
-																			{
-																				reply.content
-																			}
-																		</p>
-																		<button
-																			onClick={() =>
-																				handleLike(
-																					reply.id,
-																					true,
-																					comment.id
-																				)
-																			}
-																			className={`flex items-center gap-1 px-2 py-1 rounded-full text-sm transition-all ${
-																				reply.liked
-																					? "bg-purple-100 text-purple-700"
-																					: "text-gray-500 hover:bg-gray-100"
-																			}`}
-																		>
-																			<ThumbsUp className="w-3 h-3" />
-																			{
-																				reply.likes
-																			}
-																		</button>
-																	</div>
-																</div>
-															)
-														)}
-													</div>
-												)}
-
-												{/* Reply Form */}
-												{replyingTo === comment.id && (
-													<div className="mt-4 ml-6">
-														<div className="flex gap-3">
-															<div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-																CU
-															</div>
-															<div className="flex-1">
-																<textarea
-																	value={
-																		replyContent
-																	}
-																	onChange={(
-																		e
-																	) =>
-																		setReplyContent(
-																			e
-																				.target
-																				.value
-																		)
-																	}
-																	placeholder="Write your reply..."
-																	className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none text-sm"
-																	rows="2"
-																/>
-																<div className="flex gap-2 mt-2">
-																	<button
-																		onClick={() =>
-																			handleAddReply(
-																				comment.id
-																			)
-																		}
-																		className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-1 rounded-lg font-semibold hover:from-purple-700 hover:to-indigo-700 transition-all duration-300 text-sm"
-																	>
-																		Reply
-																	</button>
-																	<button
-																		onClick={() =>
-																			setReplyingTo(
-																				null
-																			)
-																		}
-																		className="text-gray-500 hover:text-gray-700 px-4 py-1 text-sm"
-																	>
-																		Cancel
-																	</button>
-																</div>
-															</div>
-														</div>
-													</div>
-												)}
-											</div>
-										</div>
+										<CommentThread
+											comment={comment}
+											depth={0}
+											onLike={handleLike}
+											onReply={setReplyingTo}
+											replyingTo={replyingTo}
+											replyContent={replyContent}
+											onReplyContentChange={
+												setReplyContent
+											}
+											onAddReply={handleAddReply}
+											onCancelReply={() =>
+												setReplyingTo(null)
+											}
+										/>
 									</div>
 								))}
 							</div>
