@@ -176,7 +176,7 @@ const NotificationsPage = () => {
 						</div>
 
 						{/* User Type Selector */}
-						<div className="flex bg-gray-100 rounded-lg p-1">
+						{/* <div className="flex bg-gray-100 rounded-lg p-1">
 							<button
 								onClick={() => setUserType("user")}
 								className={`flex items-center px-4 py-2 rounded-md transition-colors ${
@@ -199,7 +199,7 @@ const NotificationsPage = () => {
 								<Shield className="w-4 h-4 mr-2" />
 								Admin View
 							</button>
-						</div>
+						</div> */}
 					</div>
 				</div>
 
