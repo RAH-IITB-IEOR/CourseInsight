@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
 	Search,
 	Filter,
@@ -15,96 +15,107 @@ const Home = () => {
 	const [searchTerm, setSearchTerm] = useState("");
 	const [selectedSemester, setSelectedSemester] = useState("All");
 	const [isFilterOpen, setIsFilterOpen] = useState(false);
+	const [courses, setCourses] = useState([]);
 
 	const router = useRouter();
 
 	// Sample course data
-	const courses = [
-		{
-			id: "IE506",
-			name: "Operations Research",
-			semester: "Autumn",
-			credits: 3,
-			instructor: "Dr. Smith",
-		},
-		{
-			id: "IE620",
-			name: "Advanced Statistics",
-			semester: "Winter",
-			credits: 4,
-			instructor: "Dr. Johnson",
-		},
-		{
-			id: "IE621",
-			name: "Supply Chain Management",
-			semester: "Autumn",
-			credits: 3,
-			instructor: "Dr. Williams",
-		},
-		{
-			id: "IE619",
-			name: "Quality Control",
-			semester: "Winter",
-			credits: 3,
-			instructor: "Dr. Brown",
-		},
-		{
-			id: "IE507",
-			name: "Linear Programming",
-			semester: "Autumn",
-			credits: 4,
-			instructor: "Dr. Davis",
-		},
-		{
-			id: "IE622",
-			name: "Production Planning",
-			semester: "Winter",
-			credits: 3,
-			instructor: "Dr. Miller",
-		},
-		{
-			id: "IE623",
-			name: "Inventory Management",
-			semester: "Autumn",
-			credits: 3,
-			instructor: "Dr. Wilson",
-		},
-		{
-			id: "IE618",
-			name: "Simulation Modeling",
-			semester: "Winter",
-			credits: 4,
-			instructor: "Dr. Moore",
-		},
-		{
-			id: "IE508",
-			name: "Engineering Economics",
-			semester: "Autumn",
-			credits: 3,
-			instructor: "Dr. Taylor",
-		},
-		{
-			id: "IE624",
-			name: "Project Management",
-			semester: "Winter",
-			credits: 3,
-			instructor: "Dr. Anderson",
-		},
-		{
-			id: "IE625",
-			name: "Data Analytics",
-			semester: "Autumn",
-			credits: 4,
-			instructor: "Dr. Thomas",
-		},
-		{
-			id: "IE617",
-			name: "Lean Manufacturing",
-			semester: "Winter",
-			credits: 3,
-			instructor: "Dr. Jackson",
-		},
-	];
+	// const courses = [
+	// 	{
+	// 		id: "IE506",
+	// 		name: "Operations Research",
+	// 		semester: "Autumn",
+	// 		credits: 3,
+	// 		instructor: "Dr. Smith",
+	// 	},
+	// 	{
+	// 		id: "IE620",
+	// 		name: "Advanced Statistics",
+	// 		semester: "Winter",
+	// 		credits: 4,
+	// 		instructor: "Dr. Johnson",
+	// 	},
+	// 	{
+	// 		id: "IE621",
+	// 		name: "Supply Chain Management",
+	// 		semester: "Autumn",
+	// 		credits: 3,
+	// 		instructor: "Dr. Williams",
+	// 	},
+	// 	{
+	// 		id: "IE619",
+	// 		name: "Quality Control",
+	// 		semester: "Winter",
+	// 		credits: 3,
+	// 		instructor: "Dr. Brown",
+	// 	},
+	// 	{
+	// 		id: "IE507",
+	// 		name: "Linear Programming",
+	// 		semester: "Autumn",
+	// 		credits: 4,
+	// 		instructor: "Dr. Davis",
+	// 	},
+	// 	{
+	// 		id: "IE622",
+	// 		name: "Production Planning",
+	// 		semester: "Winter",
+	// 		credits: 3,
+	// 		instructor: "Dr. Miller",
+	// 	},
+	// 	{
+	// 		id: "IE623",
+	// 		name: "Inventory Management",
+	// 		semester: "Autumn",
+	// 		credits: 3,
+	// 		instructor: "Dr. Wilson",
+	// 	},
+	// 	{
+	// 		id: "IE618",
+	// 		name: "Simulation Modeling",
+	// 		semester: "Winter",
+	// 		credits: 4,
+	// 		instructor: "Dr. Moore",
+	// 	},
+	// 	{
+	// 		id: "IE508",
+	// 		name: "Engineering Economics",
+	// 		semester: "Autumn",
+	// 		credits: 3,
+	// 		instructor: "Dr. Taylor",
+	// 	},
+	// 	{
+	// 		id: "IE624",
+	// 		name: "Project Management",
+	// 		semester: "Winter",
+	// 		credits: 3,
+	// 		instructor: "Dr. Anderson",
+	// 	},
+	// 	{
+	// 		id: "IE625",
+	// 		name: "Data Analytics",
+	// 		semester: "Autumn",
+	// 		credits: 4,
+	// 		instructor: "Dr. Thomas",
+	// 	},
+	// 	{
+	// 		id: "IE617",
+	// 		name: "Lean Manufacturing",
+	// 		semester: "Winter",
+	// 		credits: 3,
+	// 		instructor: "Dr. Jackson",
+	// 	},
+	// ];
+
+	// Fetch courses from the backend
+	useEffect(() => {
+		fetch("http://localhost:3000/course/all")
+			.then((res) => res.json())
+			.then((data) => {
+				console.log(data);
+				setCourses(data);
+			});
+	}, []);
 
 	const semesters = ["All", "Autumn", "Winter"];
 
